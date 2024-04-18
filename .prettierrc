@@ -1,5 +1,22 @@
 {
     "tabWidth": 4,
     "semi": true,
-    "singleAttributePerLine": true
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 120,
+    "useTabs": false,
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "always",
+    "endOfLine": "auto",
+    "embeddedLanguageFormatting": "auto",
+    "overrides": [
+        {
+            "files": ".*",
+            "options": {
+                "parser": "typescript"
+            }
+        }
+    ]
+    
 }
