@@ -211,7 +211,7 @@
     }
 
     .success-toast {
-        @apply bg-green-100 text-green-900;
+        @apply bg-green-100 text-dark-600;
     }
 
     .error-toast {

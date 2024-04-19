@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { ClerkProvider } from '@clerk/nextjs';
 
+
 const poppins = Poppins({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700'],
