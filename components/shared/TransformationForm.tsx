@@ -12,8 +12,9 @@ import { Input } from '@/components/ui/input';
 import { aspectRatioOptions, defaultValues, transformationTypes } from '@/constants';
 import { TransformationFormProps, Transformations } from '@/types';
 import { CustomField } from './CustomField';
-import { useState } from 'react';
-import { AspectRatioKey } from '@/lib/utils';
+import { useState, useTransition } from 'react';
+import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/utils';
+import { updateCredits } from '@/lib/actions/user.actions';
 
 export const formSchema = z.object({
     title: z.string(),
@@ -43,6 +44,8 @@ const TransformationForm = ({
 
     const [transformationConfig, setTransformationConfig] = useState(config);
 
+    const [isPending, startTransition] = useTransition();
+
     const initalValues =
         data && action === 'Update'
             ? {
@@ -65,34 +68,64 @@ const TransformationForm = ({
         console.log(values);
     }
 
-    const onSelectFieldHandler = (value: string, onChangeField: (value: string) => void) => {};
+    const onSelectFieldHandler = (value: string, onChangeField: (value: string) => void) => {
+        const imageSize = aspectRatioOptions[value as AspectRatioKey];
+
+        setImage((prevState: any) => ({
+            ...prevState,
+            aspectRatio: imageSize,
+            width: imageSize.width,
+            height: imageSize.height,
+        }));
+
+        setNewTransformation(transformationType.config);
+
+        return onChangeField(value);
+    };
 
     const onInputChangeHandler = (
         fieldName: string,
         value: string,
         type: string,
         onChangeField: (value: string) => void
-    ) => {};
+    ) => {
+        debounce(() => {
+            setNewTransformation((prevState: any) => ({
+                ...prevState,
+                [type]: {
+                    ...prevState?.[type],
+                    [fieldName === 'prompt' ? 'prompt' : 'to']: value,
+                },
+            }));
 
-    const onTranformHandler = () => {};
+            return onChangeField(value);
+        }, 500);
+    };
+
+    // TODO: return to updateCredits
+    const onTranformHandler = async () => {
+        setIsTransforming(true);
+
+        const mergedTransformation = deepMergeObjects(newTransformation, transformationConfig);
+
+        setTransformationConfig(mergedTransformation);
+
+        setNewTransformation(null);
+
+        startTransition(async () => {
+            /* await updateCredits(userId, creditFee); */
+        });
+    };
 
     return (
         <Form {...form}>
-            <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <CustomField
                     control={form.control}
                     name="title"
                     formLabel="Image Title"
                     className="w-full"
-                    render={({ field }) => (
-                        <Input
-                            className="input-field"
-                            {...field}
-                        />
-                    )}
+                    render={({ field }) => <Input className="input-field" {...field} />}
                 />
 
                 {type === 'fill' && (
@@ -108,11 +141,7 @@ const TransformationForm = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {Object.keys(aspectRatioOptions).map((key) => (
-                                        <SelectItem
-                                            key={key}
-                                            value={key}
-                                            className="select-item"
-                                        >
+                                        <SelectItem key={key} value={key} className="select-item">
                                             {aspectRatioOptions[key as AspectRatioKey].label}
                                         </SelectItem>
                                     ))}
@@ -169,11 +198,7 @@ const TransformationForm = ({
                     >
                         {isTransforming ? 'Transforming...' : 'Apply Transformation'}
                     </Button>
-                    <Button
-                        type="submit"
-                        className="submit-button capitalize"
-                        disabled={isSubmitting}
-                    >
+                    <Button type="submit" className="submit-button capitalize" disabled={isSubmitting}>
                         {isSubmitting ? 'Submitting...' : 'Save Image'}
                     </Button>
                 </div>

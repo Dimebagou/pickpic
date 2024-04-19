@@ -7,9 +7,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 const MobileNav = () => {
     const pathname = usePathname();
+
+    const [open, setOpen] = useState(false);
 
     return (
         <header className="header">
@@ -19,7 +22,7 @@ const MobileNav = () => {
             <nav className="flex gap-2">
                 <SignedIn>
                     <UserButton afterSignOutUrl="/" />
-                    <Sheet>
+                    <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger>
                             <Image
                                 src="/assets/icons/menu.svg"
@@ -30,7 +33,7 @@ const MobileNav = () => {
                             />
                         </SheetTrigger>
                         <SheetContent className="sheet-content sm:w-64">
-                            <>
+                            <div onClick={() => setOpen(false)}>
                                 <Image src="/assets/images/logo-text.png" alt="logo" width={152} height={23} />
                                 <ul className="header-nav_elements">
                                     {navLinks.map((link) => {
@@ -54,7 +57,7 @@ const MobileNav = () => {
                                         );
                                     })}
                                 </ul>
-                            </>
+                            </div>
                         </SheetContent>
                     </Sheet>
                 </SignedIn>
