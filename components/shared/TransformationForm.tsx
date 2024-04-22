@@ -16,6 +16,7 @@ import { useState, useTransition } from 'react';
 import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/utils';
 import { updateCredits } from '@/lib/actions/user.actions';
 import MediaUploader from './MediaUploader';
+import TransformedImage from './TransformedImage';
 
 export const formSchema = z.object({
     title: z.string(),
@@ -103,7 +104,7 @@ const TransformationForm = ({
         }, 500);
     };
 
-    // TODO: return to updateCredits
+    // TODO: Update creditFee to something else
     const onTranformHandler = async () => {
         setIsTransforming(true);
 
@@ -114,7 +115,7 @@ const TransformationForm = ({
         setNewTransformation(null);
 
         startTransition(async () => {
-            /* await updateCredits(userId, creditFee); */
+            await updateCredits(userId, -1);
         });
     };
 
@@ -195,7 +196,24 @@ const TransformationForm = ({
                         control={form.control}
                         name="publicId"
                         className="flex size-full flex-col"
-                        render={({ field }) => <MediaUploader onValueChange={field.onChange} setImage={setImage} publicId={field.value} image={image} type={type} />}
+                        render={({ field }) => (
+                            <MediaUploader
+                                onValueChange={field.onChange}
+                                setImage={setImage}
+                                publicId={field.value}
+                                image={image}
+                                type={type}
+                            />
+                        )}
+                    />
+
+                    <TransformedImage
+                        image={image}
+                        title={form.getValues('title')}
+                        type={type}
+                        isTransforming={isTransforming}
+                        setIsTransforming={setIsTransforming}
+                        transformationConfig={transformationConfig}
                     />
                 </div>
 
